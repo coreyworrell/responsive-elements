@@ -126,7 +126,10 @@
       b.dom.elements = document.querySelectorAll("[" + b.config.attr + "]");
       return b;
     };
-    b.enable = function() {
+    b.enable = function(config) {
+      if (config) {
+        b.setConfig(config);
+      }
       bind();
       return b;
     };
