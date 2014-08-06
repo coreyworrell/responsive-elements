@@ -4,13 +4,15 @@
  * Inspired by https://github.com/kumailht/responsive-elements
  * 
  * @copyright Corey Worrell 2014
- * @version   1.0.0
+ * @version   1.1.0
 ###
 
-(->
-	ResponsiveElements = (options) ->
-		# Options
-		opts =
+do ->
+	window.re = do ->
+		b = this
+
+		# Configuration
+		b.config =
 			attr:         'data-respond'
 			widthAttr:    'data-width'
 			refreshRate:  50
@@ -20,13 +22,10 @@
 			end:          900
 			interval:     50
 
-		for key, value of options
-			opts[key] = value if opts[key]?
-
-		# DOM
-		dom =
+		# DOM elements
+		b.dom =
 			window:   window
-			elements: document.querySelectorAll "[#{opts.attr}]"
+			elements: document.querySelectorAll "[#{b.config.attr}]"
 
 		# Utilities
 		util =
@@ -55,20 +54,28 @@
 		# Bind listeners
 		bind = ->
 			dom.window.addEventListener 'load', respondAll
-			dom.window.addEventListener 'resize', (util.debounce respondAll, opts.refreshRate)
+			dom.window.addEventListener 'resize', debounceRespondAll
+
+		# Unbind listeners
+		unbind = ->
+			dom.window.removeEventListener 'load', respondAll, false
+			dom.window.removeEventListener 'resize', debounceRespondAll, false
 
 		# Respond all elements
 		respondAll = (e) ->
 			for element in dom.elements
 				respond element
 
+		# Respond with a debounce
+		debounceRespondAll = util.debounce respondAll, b.config.refreshRate
+
 		# Respond single element
 		respond = (element) ->
-			params = parseParams (element.getAttribute opts.attr)
+			params = parseParams (element.getAttribute b.config.attr)
 
 			data = makeData element.offsetWidth, params
 
-			element.setAttribute opts.widthAttr, (data.join ' ')
+			element.setAttribute b.config.widthAttr, (data.join ' ')
 
 		# Make responsive data
 		makeData = (width, params) ->
@@ -76,7 +83,7 @@
 
 			i = if params.interval > params.start then params.interval else ~~(params.start / params.interval) * params.interval
 
-			width = width * (opts.baseFontSize / opts.rootFontSize)
+			width = width * (b.config.baseFontSize / b.config.rootFontSize)
 
 			while i <= params.end
 				data.push "gt#{i}" if i < width
@@ -89,25 +96,47 @@
 		# Parse parameters
 		parseParams = (string) ->
 			params  =
-				start:    opts.start
-				end:      opts.end
-				interval: opts.interval
+				start:    b.config.start
+				end:      b.config.end
+				interval: b.config.interval
 
-			matches = string.match /([a-zA-Z]|[0-9]+)/g
+			matches = string.match /([a-zA-Z]+|[0-9]+)/g
 
 			if ! matches
 				return params
 
 			for match, i in matches by 2
-				switch match.toLowerCase()
+				switch match[0].toLowerCase()
 					when 's' then params.start    = +matches[i + 1]
 					when 'e' then params.end      = +matches[i + 1]
 					when 'i' then params.interval = +matches[i + 1]
 
 			params
 
-		bind()
+		# Public methods
+		# Set configuration
+		b.setConfig = (config) ->
+			for key, value of config
+				b.config[key] = value if b.config[key]?
 
-	# Export
-	window.ResponsiveElements = ResponsiveElements
-)()
+			b.dom.elements = document.querySelectorAll "[#{b.config.attr}]"
+
+			b
+
+		# Enable
+		b.enable = ->
+			bind()
+			b
+
+		# Disable
+		b.disable = ->
+			unbind()
+			b
+
+		# Refresh
+		b.refresh = ->
+			respondAll()
+			b
+
+		# Return self
+		b
