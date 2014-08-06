@@ -124,7 +124,10 @@ do ->
 			b
 
 		# Enable
-		b.enable = ->
+		b.enable = (config) ->
+			if config
+				b.setConfig config
+				
 			bind()
 			b
 
