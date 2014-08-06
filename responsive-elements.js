@@ -1,17 +1,17 @@
+
 /**
  * Responsive Elements
  *
  * Inspired by https://github.com/kumailht/responsive-elements
  * 
  * @copyright Corey Worrell 2014
- * @version   1.0.0
-*/
-
+ * @version   1.1.0
+ */
 (function() {
-  var ResponsiveElements;
-  ResponsiveElements = function(options) {
-    var bind, dom, key, makeData, opts, parseParams, respond, respondAll, util, value;
-    opts = {
+  return window.re = (function() {
+    var b, bind, debounceRespondAll, makeData, parseParams, respond, respondAll, unbind, util;
+    b = this;
+    b.config = {
       attr: 'data-respond',
       widthAttr: 'data-width',
       refreshRate: 50,
@@ -21,15 +21,9 @@
       end: 900,
       interval: 50
     };
-    for (key in options) {
-      value = options[key];
-      if (opts[key] != null) {
-        opts[key] = value;
-      }
-    }
-    dom = {
+    b.dom = {
       window: window,
-      elements: document.querySelectorAll("[" + opts.attr + "]")
+      elements: document.querySelectorAll("[" + b.config.attr + "]")
     };
     util = {
       debounce: function(func, wait, immediate) {
@@ -56,7 +50,11 @@
     };
     bind = function() {
       dom.window.addEventListener('load', respondAll);
-      return dom.window.addEventListener('resize', util.debounce(respondAll, opts.refreshRate));
+      return dom.window.addEventListener('resize', debounceRespondAll);
+    };
+    unbind = function() {
+      dom.window.removeEventListener('load', respondAll, false);
+      return dom.window.removeEventListener('resize', debounceRespondAll, false);
     };
     respondAll = function(e) {
       var element, _i, _len, _ref, _results;
@@ -68,17 +66,18 @@
       }
       return _results;
     };
+    debounceRespondAll = util.debounce(respondAll, b.config.refreshRate);
     respond = function(element) {
       var data, params;
-      params = parseParams(element.getAttribute(opts.attr));
+      params = parseParams(element.getAttribute(b.config.attr));
       data = makeData(element.offsetWidth, params);
-      return element.setAttribute(opts.widthAttr, data.join(' '));
+      return element.setAttribute(b.config.widthAttr, data.join(' '));
     };
     makeData = function(width, params) {
       var data, i;
       data = [];
       i = params.interval > params.start ? params.interval : ~~(params.start / params.interval) * params.interval;
-      width = width * (opts.baseFontSize / opts.rootFontSize);
+      width = width * (b.config.baseFontSize / b.config.rootFontSize);
       while (i <= params.end) {
         if (i < width) {
           data.push("gt" + i);
@@ -93,17 +92,17 @@
     parseParams = function(string) {
       var i, match, matches, params, _i, _len;
       params = {
-        start: opts.start,
-        end: opts.end,
-        interval: opts.interval
+        start: b.config.start,
+        end: b.config.end,
+        interval: b.config.interval
       };
-      matches = string.match(/([a-zA-Z]|[0-9]+)/g);
+      matches = string.match(/([a-zA-Z]+|[0-9]+)/g);
       if (!matches) {
         return params;
       }
       for (i = _i = 0, _len = matches.length; _i < _len; i = _i += 2) {
         match = matches[i];
-        switch (match.toLowerCase()) {
+        switch (match[0].toLowerCase()) {
           case 's':
             params.start = +matches[i + 1];
             break;
@@ -116,7 +115,29 @@
       }
       return params;
     };
-    return bind();
-  };
-  return window.ResponsiveElements = ResponsiveElements;
+    b.setConfig = function(config) {
+      var key, value;
+      for (key in config) {
+        value = config[key];
+        if (b.config[key] != null) {
+          b.config[key] = value;
+        }
+      }
+      b.dom.elements = document.querySelectorAll("[" + b.config.attr + "]");
+      return b;
+    };
+    b.enable = function() {
+      bind();
+      return b;
+    };
+    b.disable = function() {
+      unbind();
+      return b;
+    };
+    b.refresh = function() {
+      respondAll();
+      return b;
+    };
+    return b;
+  })();
 })();
