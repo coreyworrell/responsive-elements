@@ -21,12 +21,20 @@ Define which elements you'd like to respond to "media queries" by adding the `da
 </div>
 ~~~
 
-Then create a new instance of `ResponsiveElements`
+Then enable it in your Javascript file
 
 ~~~js
-new ResponsiveElements;
-// or
-new ResponsiveElements({...});
+re.enable();
+~~~
+
+Or set configuration and then enable
+
+~~~js
+re.setConfig({
+  start:    300,
+  end:      650,
+  interval: 25
+}).enable();
 ~~~
 
 Now in your CSS, setup selectors to target certain widths
@@ -60,17 +68,28 @@ So, if you just provide your base font size to base calculations off (the defaul
 
 For example, if your element is measured at `500px` wide while the root font size is `16px`, when you bump your root font up to `24px`, the element will be measured at about `833px` (`500 + (500 * (16 / 24))`). Responsive Elements knows this though and reports the width back as `500`, so that your selectors still apply correctly.
 
-## Options
+## Data Options
 
-You can set the default options when creating the JavaScript object
+Each responsive element can control its own `start`, `end` and `interval` values as well. The format of the values is pretty loose, allowing you to choose what you prefer, as long as you follow the "keyword/letter followed by number" format.
 
-~~~js
-new ResponsiveElements({
-  attr: 'data-responsive',
-  start: 400,
-  end:   700
-});
+~~~html
+<div class="module-calendar" data-respond="s300e500i25">...</div>
+<div class="module-heading" data-respond="start: 450, i: 75">...</div>
+<div class="module-buttons" data-respond="e 1020; i: 120 start450">...</div>
 ~~~
+
+Those would render as something like:
+
+~~~html
+<div class="module-calendar" data-respond="s300e500i25" data-width="gt300 gt325 gt350 gt375 gt400 lt425 lt450 lt475 lt500">...</div>
+~~~
+
+## Methods
+
+### `re.setConfig(config)`
+
+Sets the configuration
+
 
 | Option | Default | Description |
 |:-------|:--------|:------------|
@@ -83,16 +102,37 @@ new ResponsiveElements({
 | `end` | `900` | When to stop querying width |
 | `interval` | `50` | How often to query width |
 
-Each responsive element can control its own `start`, `end` and `interval` values as well. The format of the values is pretty loose, allowing you to choose what you prefer, as long as you follow the "single letter followed by integer" format.
-
-~~~html
-<div class="module-calendar" data-respond="s300e500i25">...</div>
-<div class="module-heading" data-respond="s: 450, i: 75">...</div>
-<div class="module-buttons" data-respond="e 1020; i120 s: 450">...</div>
+~~~js
+re.setConfig({
+  attr: 'data-responsive',
+  start: 400,
+  end:   700
+});
 ~~~
 
-Those would render as something like:
+### `re.enable([config])`
 
-~~~html
-<div class="module-calendar" data-respond="s300e500i25" data-width="gt300 gt325 gt350 gt375 gt400 lt425 lt450 lt475 lt500">...</div>
+Enable responsive elements on page load and monitors window resizes.
+
+Allows passing the configuration as a shortcut for `setConfig()`
+
+~~~js
+re.enable();
+re.enable({start: 100});
+~~~
+
+### `re.disable()`
+
+Disables repsonsive elements. Window resizing will not update responsive elements.
+
+~~~js
+re.disable()
+~~~
+
+### `re.refresh()`
+
+Causes responsive elements to refresh and calculate widths. Useful for when content is modified and/or shown/hidden.
+
+~~~js
+re.refresh()
 ~~~
