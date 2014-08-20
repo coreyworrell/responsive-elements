@@ -4,11 +4,11 @@
  * Inspired by https://github.com/kumailht/responsive-elements
  * 
  * @copyright Corey Worrell 2014
- * @version   1.1.0
+ * @version   1.1.1
 ###
 
 do ->
-	window.re = do ->
+	window.re = new ->
 		b = this
 
 		# Configuration
@@ -53,17 +53,17 @@ do ->
 
 		# Bind listeners
 		bind = ->
-			dom.window.addEventListener 'load', respondAll
-			dom.window.addEventListener 'resize', debounceRespondAll
+			b.dom.window.addEventListener 'load', respondAll
+			b.dom.window.addEventListener 'resize', debounceRespondAll
 
 		# Unbind listeners
 		unbind = ->
-			dom.window.removeEventListener 'load', respondAll, false
-			dom.window.removeEventListener 'resize', debounceRespondAll, false
+			b.dom.window.removeEventListener 'load', respondAll, false
+			b.dom.window.removeEventListener 'resize', debounceRespondAll, false
 
 		# Respond all elements
 		respondAll = (e) ->
-			for element in dom.elements
+			for element in b.dom.elements
 				respond element
 
 		# Respond with a debounce
@@ -124,10 +124,7 @@ do ->
 			b
 
 		# Enable
-		b.enable = (config) ->
-			if config
-				b.setConfig config
-				
+		b.enable = ->
 			bind()
 			b
 
