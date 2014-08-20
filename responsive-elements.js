@@ -1,14 +1,13 @@
-
 /**
  * Responsive Elements
  *
  * Inspired by https://github.com/kumailht/responsive-elements
  * 
  * @copyright Corey Worrell 2014
- * @version   1.1.0
+ * @version   1.1.1
  */
 (function() {
-  return window.re = (function() {
+  return window.re = new function() {
     var b, bind, debounceRespondAll, makeData, parseParams, respond, respondAll, unbind, util;
     b = this;
     b.config = {
@@ -49,16 +48,16 @@
       }
     };
     bind = function() {
-      dom.window.addEventListener('load', respondAll);
-      return dom.window.addEventListener('resize', debounceRespondAll);
+      b.dom.window.addEventListener('load', respondAll);
+      return b.dom.window.addEventListener('resize', debounceRespondAll);
     };
     unbind = function() {
-      dom.window.removeEventListener('load', respondAll, false);
-      return dom.window.removeEventListener('resize', debounceRespondAll, false);
+      b.dom.window.removeEventListener('load', respondAll, false);
+      return b.dom.window.removeEventListener('resize', debounceRespondAll, false);
     };
     respondAll = function(e) {
       var element, _i, _len, _ref, _results;
-      _ref = dom.elements;
+      _ref = b.dom.elements;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         element = _ref[_i];
@@ -126,10 +125,7 @@
       b.dom.elements = document.querySelectorAll("[" + b.config.attr + "]");
       return b;
     };
-    b.enable = function(config) {
-      if (config) {
-        b.setConfig(config);
-      }
+    b.enable = function() {
       bind();
       return b;
     };
@@ -142,5 +138,5 @@
       return b;
     };
     return b;
-  })();
+  };
 })();
